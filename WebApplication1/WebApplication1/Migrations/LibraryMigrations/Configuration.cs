@@ -100,5 +100,29 @@ namespace WebApplication1.Migrations.LibraryMigrations
             #endregion
             context.SaveChanges(); // NOTE EF will update the relevant foreign key fields in the clubs, club events and member tables based on the attributes
         }
+
+         /*    private void loanOutBook(LibraryContext context)
+        {
+            // Create a list to hold students
+            List<Member> selectedStudents = new List<loan>();
+             //save first , then retrieve them as a list
+            foreach (var  in context.Clubs.ToList())
+            {
+                //set member if not set yet
+                if (club.clubMembers == null || club.clubMembers.Count() < 1)
+                {
+                    //set randoms one --method below
+                    selectedStudents = GetStudents(context);
+                    foreach (var m in selectedStudents)
+                    {
+                        //new member with a ref to a club ,EF will join fields later
+                        context.members.AddOrUpdate(member => member.StudentID,
+                            new Member { ClubId = club.ClubId, StudentID = m.StudentID });
+                     }
+                }
+            }
+            context.SaveChanges();
+        } */
     }
 }
+
