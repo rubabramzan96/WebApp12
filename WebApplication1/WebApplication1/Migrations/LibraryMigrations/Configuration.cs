@@ -4,7 +4,9 @@ namespace WebApplication1.Migrations.LibraryMigrations
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
+    using System.IO;
     using System.Linq;
+    using System.Reflection;
 
     internal sealed class Configuration : DbMigrationsConfiguration<WebApplication1.Models.LibraryContext>
     {
@@ -18,6 +20,9 @@ namespace WebApplication1.Migrations.LibraryMigrations
         {
             seedMember(context);
             seedBooks(context);
+            //loanOutBook(context);
+            SeedCourses(context);
+
         }
         private void seedMember(LibraryContext context)
         {
@@ -101,28 +106,54 @@ namespace WebApplication1.Migrations.LibraryMigrations
             context.SaveChanges(); // NOTE EF will update the relevant foreign key fields in the clubs, club events and member tables based on the attributes
         }
 
-         /*    private void loanOutBook(LibraryContext context)
+        /*    private void loanOutBook(LibraryContext context)
+       {
+           // Create a list to hold students
+           List<Member> selectedStudents = new List<loan>();
+            //save first , then retrieve them as a list
+           foreach (var  in context.Clubs.ToList())
+           {
+               //set member if not set yet
+               if (club.clubMembers == null || club.clubMembers.Count() < 1)
+               {
+                   //set randoms one --method below
+                   selectedStudents = GetStudents(context);
+                   foreach (var m in selectedStudents)
+                   {
+                       //new member with a ref to a club ,EF will join fields later
+                       context.members.AddOrUpdate(member => member.StudentID,
+                           new Member { ClubId = club.ClubId, StudentID = m.StudentID });
+                    }
+               }
+           }
+           context.SaveChanges();
+       } */
+
+        public static void SeedCourses(LibraryContext context)
         {
-            // Create a list to hold students
-            List<Member> selectedStudents = new List<loan>();
-             //save first , then retrieve them as a list
-            foreach (var  in context.Clubs.ToList())
-            {
-                //set member if not set yet
-                if (club.clubMembers == null || club.clubMembers.Count() < 1)
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string resourceName = "WebApplication1.Migrations.LibraryMigrations.Courses.csv";
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                 {
-                    //set randoms one --method below
-                    selectedStudents = GetStudents(context);
-                    foreach (var m in selectedStudents)
+                    CsvReader csvReader = new CsvReader(reader);
+                    csvReader.Configuration.HasHeaderRecord = false;
+                    var courseData = csvReader.GetRecords<CourseDataImport>().ToArray();
+                    foreach (var dataItem in courseData)
                     {
-                        //new member with a ref to a club ,EF will join fields later
-                        context.members.AddOrUpdate(member => member.StudentID,
-                            new Member { ClubId = club.ClubId, StudentID = m.StudentID });
-                     }
+                        context.Courses.AddOrUpdate(c =>
+                                new { c.CourseCode, c.CourseName },
+                                new Course
+                                {
+                                    CourseCode = dataItem.CourseCode,
+                                    CourseName = dataItem.CourseName,
+                                    CourseYear = dataItem.Year
+                                });
+                    }
                 }
-            }
             context.SaveChanges();
-        } */
+        }
+          
+        }
     }
-}
 
